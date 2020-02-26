@@ -7,6 +7,7 @@ require 'sellsy/contact'
 require 'sellsy/opportunity'
 require 'sellsy/prospect'
 require 'sellsy/document'
+require 'sellsy/attachment'
 
 module Sellsy
 end

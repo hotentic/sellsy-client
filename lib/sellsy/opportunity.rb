@@ -5,54 +5,67 @@ module Sellsy
     attr_accessor :id
     attr_accessor :name, :type, :joindate, :email
 
-    #   def create
-    #     command = {
-    #         'method' => 'Client.create',
-    #         'params' => {
-    #             'third' => {
-    #                 'name'			=> @name,
-    #                 'joindate'	    => @joindate,
-    #                 'type'			=> @type,
-    #                 'email'			=> @email
-    #             }
-    #         }
-    #     }
+    # note : linkedid to provide is the one of the contact / prospect
+    def create
+      command = {
+          'method' => 'Opportunities.create',
+          'params' => {
+              'opportunity' => {
+                  'linkedtype' => 'third',
+                  # 'linkedid' => '22501958',
+                  'linkedid' => '22757971',
+                  'ident' => "TEST-#{Time.current.to_i}",
+                  'sourceid' => '103760',
+                  # 'dueDate' => '',
+                  # 'creationDate' => '',
+                  'name' => 'Test opportunité via API',
+                  # 'potential' => '',
+                  'funnelid' => '55342',
+                  'stepid' => '395221',
+                  # 'proba' => '',
+                  # 'brief' => '',
+                  # 'stickyNote' => '',
+                  # 'tags' => '',
+                  # 'staffs' => '',
+                  # 'contacts' => ''
+              }
+          }
+      }
 
-    #     response = MultiJson.load(Sellsy::Api.request command)
+      response = MultiJson.load(Sellsy::Api.request command)
 
-    #     @id = response['response']['client_id'] if response['response']
+      @id = response['response']
 
-    #     return response['status'] == 'success'
-    #   end
+      response['status'] == 'success'
+    end
 
-    #   def update
+    def update
 
-    #   end
-    # end
+    end
 
-    # class Opportunities
-    # def self.find(id)
-    #   command = {
-    #       'method' => 'Client.getOne',
-    #       'params' => {
-    #           'clientid' => id
-    #       }
-    #   }
 
-    #   response = MultiJson.load(Sellsy::Api.request command)
+    def self.find(id)
+      command = {
+          'method' => 'Client.getOne',
+          'params' => {
+              'clientid' => id
+          }
+      }
 
-    #   client = Client.new
+      response = MultiJson.load(Sellsy::Api.request command)
 
-    #   if response['response']
-    #     value = response['response']['client']
-    #     client.id = value['id']
-    #     client.name = value['name']
-    #     client.joindate = value['joindate']
-    #     client.type = value['type']
-    #   end
+      client = Client.new
 
-    #   return client
-    # end
+      if response['response']
+        value = response['response']['client']
+        client.id = value['id']
+        client.name = value['name']
+        client.joindate = value['joindate']
+        client.type = value['type']
+      end
+
+      return client
+    end
 
     def self.search(params)
       command = {

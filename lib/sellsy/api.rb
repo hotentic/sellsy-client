@@ -37,16 +37,14 @@ module Sellsy
       MultiJson.load(self.request command)
     end
 
-    def self.request(payload)
-      # params = {
-      #     'request' => 1,
-      #     'io_mode' => 'json',
-      #     'do_in' => payload.to_json
-      # }
+    def self.request(payload, file = nil)
+      file_params = file ? {'do_file' => file} : {}
 
       RestClient.log = 'stdout'
-      RestClient.post 'https://apifeed.sellsy.com/0/', {:request => 1, :io_mode => 'json', 'do_in' => payload.to_json, :multipart => true},
-                      {:authorization => self.authentication_header}
+      RestClient.post('https://apifeed.sellsy.com/0/',
+                      {:request => 1, :io_mode => 'json', 'do_in' => payload.to_json, :multipart => true}.merge(file_params),
+                      {:authorization => self.authentication_header})
+      # { |resp| puts "resp : #{resp.body}" }
     end
 
     class Configuration
