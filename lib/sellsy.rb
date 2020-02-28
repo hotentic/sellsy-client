@@ -8,6 +8,7 @@ require 'sellsy/opportunity'
 require 'sellsy/prospect'
 require 'sellsy/document'
 require 'sellsy/attachment'
+require 'sellsy/custom_field'
 
 module Sellsy
 end

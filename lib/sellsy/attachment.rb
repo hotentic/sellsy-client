@@ -1,13 +1,13 @@
 module Sellsy
   class Attachment
-    attr_accessor :file
+    attr_accessor :id, :entity_id, :entity_type, :file
 
     def create
       command = {
           'method' => 'Briefcases.uploadFile',
           'params' => {
-              'linkedtype' => 'third',
-              'linkedid' => '22757971'
+              'linkedtype' => @entity_type,
+              'linkedid' => @entity_id
           }
       }
 

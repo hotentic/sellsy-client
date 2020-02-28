@@ -2,31 +2,61 @@ require 'multi_json'
 
 module Sellsy
   class Customer
-    attr_accessor :id
-    attr_accessor :name, :type, :joindate, :email
+    attr_accessor :id, :title, :name, :first_name, :last_name, :structure_name, :category, :college_type, :siret,
+                  :ape, :legal_type, :role, :birth_date, :address, :postal_code, :town, :country, :telephone, :email,
+                  :website, :payment_method, :person_type, :apidae_member_id
 
     def create
       command = {
           'method' => 'Client.create',
-          'params' => {
-              'third' => {
-                  'name' => @name,
-                  'joindate' => @joindate,
-                  'type' => @type,
-                  'email' => @email
-              }
-          }
+          'params' => api_params
       }
 
       response = MultiJson.load(Sellsy::Api.request command)
-
-      @id = response['response']['client_id'] if response['response']
-
+      @id = response['response']
       response['status'] == 'success'
     end
 
     def update
+      command = {
+          'method' => 'Client.update',
+          'params' => api_params
+      }
 
+      response = MultiJson.load(Sellsy::Api.request command)
+      response['status'] == 'success'
+    end
+
+    def api_params
+      {
+          'third' => {
+              'name' => person_type == 'pp' ? @name : @structure_name,
+              'type' => person_type == 'pp' ? 'person' : 'corporation',
+              'ident' => apidae_member_id,
+              'email' => @email,
+              'web' => @website,
+              'siret' => @siret,
+              'corpType' => @legal_type,
+              'apenaf' => @ape
+          },
+          'contact' => {
+              'civil' => civil_enum(@title),
+              'name' => @last_name || @name,
+              'forename' => @first_name,
+              'email' => @email,
+              'tel' => @telephone,
+              'mobile' => @telephone,
+              'position' => @role,
+          },
+          'address' => {
+              'name' => 'adresse souscription',
+              'part1' => @address.split(/(\r\n?)/)[0],
+              'part2' => @address.split(/(\r\n?)/)[0],
+              'zip' => @postal_code,
+              'town' => @town,
+              'countrycode' => @country.upcase
+          }
+      }
     end
 
     def self.find(id)
@@ -92,6 +122,19 @@ module Sellsy
       end
 
       clients
+    end
+
+    private
+
+    def civil_enum(val)
+      case val
+      when 'M.'
+        'man'
+      when 'Mme'
+        'woman'
+      else
+        nil
+      end
     end
   end
 end

@@ -2,51 +2,89 @@ require 'multi_json'
 
 module Sellsy
   class Opportunity
-    attr_accessor :id
-    attr_accessor :name, :type, :joindate, :email
+    attr_accessor :id, :name, :reference, :amount, :entity_type, :entity_id, :source_name, :funnel_name, :step_name,
+                  :comments
 
-    # note : linkedid to provide is the one of the contact / prospect
     def create
       command = {
           'method' => 'Opportunities.create',
-          'params' => {
-              'opportunity' => {
-                  'linkedtype' => 'third',
-                  # 'linkedid' => '22501958',
-                  'linkedid' => '22757971',
-                  'ident' => "TEST-#{Time.current.to_i}",
-                  'sourceid' => '103760',
-                  # 'dueDate' => '',
-                  # 'creationDate' => '',
-                  'name' => 'Test opportunité via API',
-                  # 'potential' => '',
-                  'funnelid' => '55342',
-                  'stepid' => '395221',
-                  # 'proba' => '',
-                  # 'brief' => '',
-                  # 'stickyNote' => '',
-                  # 'tags' => '',
-                  # 'staffs' => '',
-                  # 'contacts' => ''
-              }
-          }
+          'params' => api_params
       }
 
       response = MultiJson.load(Sellsy::Api.request command)
-
       @id = response['response']
-
       response['status'] == 'success'
     end
 
     def update
+      command = {
+          'method' => 'Opportunities.update',
+          'params' => api_params
+      }
 
+      response = MultiJson.load(Sellsy::Api.request command)
+      response['status'] == 'success'
     end
 
+    def get_funnel
+      command = {'method' => 'Opportunities.getFunnels', 'params' => {}}
+      response = MultiJson.load(Sellsy::Api.request command)
+
+      funnel = nil
+      unless response['response'].blank? || funnel_name.blank?
+        funnel = response['response'].values.find {|f| f['name'].parameterize == funnel_name.parameterize}
+      end
+      funnel
+    end
+
+    def get_step(funnel_id)
+      command = {'method' => 'Opportunities.getStepsForFunnel', 'params' => {'funnelid' => funnel_id}}
+      response = MultiJson.load(Sellsy::Api.request command)
+
+      step = [nil]
+      unless response['response'].blank? || step_name.blank?
+        step = response['response'].find {|s| s['label'].parameterize == step_name.parameterize}
+      end
+      step
+    end
+
+    def get_source
+      command = {'method' => 'Opportunities.getSources', 'params' => {}}
+      response = MultiJson.load(Sellsy::Api.request command)
+
+      source = nil
+      unless response['response'].blank? || source_name.blank?
+        source = response['response'].values.find {|s| s['label'].parameterize == source_name.parameterize}
+      end
+      source
+    end
+
+    def api_params
+      funnel = get_funnel
+      step = get_step(funnel['id'])
+      source = get_source
+      if funnel && step && source
+        {
+            'opportunity' => {
+                'linkedtype' => @entity_type,
+                'linkedid' => @entity_id,
+                'ident' => @reference,
+                'sourceid' => source['id'],
+                'name' => @name,
+                'potential' => @amount,
+                'funnelid' => funnel['id'],
+                'dueDate' => (Date.today + 1.month).to_datetime.to_i,
+                'stepid' => step['id']
+            }
+        }
+      else
+        raise Exception.new("Could not find funnel, step, or source with names #{funnel_name} - #{step_name} - #{source_name}")
+      end
+    end
 
     def self.find(id)
       command = {
-          'method' => 'Client.getOne',
+          'method' => 'Opportunities.getOne',
           'params' => {
               'clientid' => id
           }
@@ -54,17 +92,15 @@ module Sellsy
 
       response = MultiJson.load(Sellsy::Api.request command)
 
-      client = Client.new
+      opportunity = Opportunity.new
 
       if response['response']
-        value = response['response']['client']
-        client.id = value['id']
-        client.name = value['name']
-        client.joindate = value['joindate']
-        client.type = value['type']
+        value = response['response']['opportunity']
+        opportunity.id = value['id']
+        opportunity.name = value['name']
       end
 
-      return client
+      return opportunity
     end
 
     def self.search(params)
