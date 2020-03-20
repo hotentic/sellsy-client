@@ -2,10 +2,9 @@ require 'multi_json'
 
 module Sellsy
   class Prospect
-
     attr_accessor :id, :title, :name, :first_name, :last_name, :structure_name, :category, :college_type, :siret,
                   :ape, :legal_type, :role, :birth_date, :address, :postal_code, :town, :country, :telephone, :email,
-                  :website, :payment_method, :person_type, :apidae_member_id
+                  :website, :payment_method, :person_type, :apidae_member_id, :main_contact_id
 
     def create
       command = {
@@ -30,6 +29,7 @@ module Sellsy
 
     def api_params
       {
+          'id' => @id,
           'third' => {
               'name' => person_type == 'pp' ? @name : @structure_name,
               'type' => person_type == 'pp' ? 'person' : 'corporation',
@@ -47,11 +47,12 @@ module Sellsy
               'tel' => @telephone,
               'mobile' => @telephone,
               'position' => @role,
+              'birthdate' => @birth_date.blank? ? '' : Date.parse(@birth_date).to_datetime.to_i
           },
           'address' => {
-              'name' => 'adresse souscription',
+              'name' => 'Adresse principale',
               'part1' => @address.split(/(\r\n?)/)[0],
-              'part2' => @address.split(/(\r\n?)/)[0],
+              'part2' => @address.split(/(\r\n?)/)[1],
               'zip' => @postal_code,
               'town' => @town,
               'countrycode' => @country.upcase
@@ -75,6 +76,7 @@ module Sellsy
         value = response['response']['client']
         prospect.id = value['id']
         prospect.name = value['name']
+        prospect.main_contact_id = value['maincontactid']
       end
 
       return prospect

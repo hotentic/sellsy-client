@@ -32,6 +32,8 @@ module Sellsy
         'prospect'
       when Opportunity
         'opportunity'
+      when Contact
+        'people'
       when Document
         'document'
       else

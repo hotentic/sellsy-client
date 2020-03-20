@@ -86,7 +86,7 @@ module Sellsy
       command = {
           'method' => 'Opportunities.getOne',
           'params' => {
-              'clientid' => id
+              'id' => id
           }
       }
 

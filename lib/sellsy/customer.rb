@@ -4,7 +4,7 @@ module Sellsy
   class Customer
     attr_accessor :id, :title, :name, :first_name, :last_name, :structure_name, :category, :college_type, :siret,
                   :ape, :legal_type, :role, :birth_date, :address, :postal_code, :town, :country, :telephone, :email,
-                  :website, :payment_method, :person_type, :apidae_member_id
+                  :website, :payment_method, :person_type, :apidae_member_id, :main_contact_id
 
     def create
       command = {
@@ -29,6 +29,7 @@ module Sellsy
 
     def api_params
       {
+          'id' => @id,
           'third' => {
               'name' => person_type == 'pp' ? @name : @structure_name,
               'type' => person_type == 'pp' ? 'person' : 'corporation',
@@ -49,7 +50,7 @@ module Sellsy
               'position' => @role,
           },
           'address' => {
-              'name' => 'adresse souscription',
+              'name' => 'Adresse principale',
               'part1' => @address.split(/(\r\n?)/)[0],
               'part2' => @address.split(/(\r\n?)/)[0],
               'zip' => @postal_code,
@@ -77,6 +78,7 @@ module Sellsy
         client.name = value['name']
         client.joindate = value['joindate']
         client.type = value['type']
+        client.main_contact_id = value['maincontactid']
       end
 
       client
