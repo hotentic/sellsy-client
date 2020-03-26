@@ -2,14 +2,14 @@ require 'multi_json'
 
 module Sellsy
   class Customer
-    attr_accessor :id, :title, :name, :first_name, :last_name, :structure_name, :category, :college_type, :siret,
-                  :ape, :legal_type, :role, :birth_date, :address, :postal_code, :town, :country, :telephone, :email,
-                  :website, :payment_method, :person_type, :apidae_member_id, :main_contact_id
+    attr_accessor :id, :name, :structure_name, :category, :college_type, :siret, :ape, :legal_type, :email,
+                  :website, :payment_method, :person_type, :apidae_member_id, :main_contact_id, :contact, :address,
+                  :contacts
 
     def create
       command = {
           'method' => 'Client.create',
-          'params' => api_params
+          'params' => to_params
       }
 
       response = MultiJson.load(Sellsy::Api.request command)
@@ -20,14 +20,14 @@ module Sellsy
     def update
       command = {
           'method' => 'Client.update',
-          'params' => api_params
+          'params' => to_params
       }
 
       response = MultiJson.load(Sellsy::Api.request command)
       response['status'] == 'success'
     end
 
-    def api_params
+    def to_params
       {
           'id' => @id,
           'third' => {
@@ -40,23 +40,8 @@ module Sellsy
               'corpType' => @legal_type,
               'apenaf' => @ape
           },
-          'contact' => {
-              'civil' => civil_enum(@title),
-              'name' => @last_name || @name,
-              'forename' => @first_name,
-              'email' => @email,
-              'tel' => @telephone,
-              'mobile' => @telephone,
-              'position' => @role,
-          },
-          'address' => {
-              'name' => 'Adresse principale',
-              'part1' => @address.split(/(\r\n?)/)[0],
-              'part2' => @address.split(/(\r\n?)/)[0],
-              'zip' => @postal_code,
-              'town' => @town,
-              'countrycode' => @country.upcase
-          }
+          'contact' => contact ? contact.to_params : {},
+          'address' => address ? address.to_params : {}
       }
     end
 
@@ -76,9 +61,8 @@ module Sellsy
         value = response['response']['client']
         client.id = value['id']
         client.name = value['name']
-        client.joindate = value['joindate']
         client.type = value['type']
-        client.main_contact_id = value['maincontactid']
+        client.contacts = response['response']['contacts']
       end
 
       client
@@ -124,19 +108,6 @@ module Sellsy
       end
 
       clients
-    end
-
-    private
-
-    def civil_enum(val)
-      case val
-      when 'M.'
-        'man'
-      when 'Mme'
-        'woman'
-      else
-        nil
-      end
     end
   end
 end

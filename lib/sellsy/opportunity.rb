@@ -65,6 +65,7 @@ module Sellsy
       source = get_source
       if funnel && step && source
         {
+            'id' => @id,
             'opportunity' => {
                 'linkedtype' => @entity_type,
                 'linkedid' => @entity_id,
@@ -95,7 +96,7 @@ module Sellsy
       opportunity = Opportunity.new
 
       if response['response']
-        value = response['response']['opportunity']
+        value = response['response']
         opportunity.id = value['id']
         opportunity.name = value['name']
       end

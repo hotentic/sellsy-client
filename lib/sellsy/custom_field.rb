@@ -15,7 +15,7 @@ module Sellsy
           'params' => {
               'linkedtype' => linked_type(entity),
               'linkedid' => entity.id,
-              'values' => custom_fields.select {|cf| !cf.value.blank?}.map {|cf| {'cfid' => cf.id, 'value' => cf.value}}
+              'values' => custom_fields.select {|cf| !cf.nil? && !cf.value.blank?}.map {|cf| {'cfid' => cf.id, 'value' => cf.value}}
           }
       }
 
@@ -39,6 +39,20 @@ module Sellsy
       else
         nil
       end
+    end
+
+    def self.all
+      command = {
+          'method' => 'CustomFields.getList',
+          'params' => {
+              'pagination' => {
+                  'nbperpage' => 30
+              }
+          }
+      }
+      response = MultiJson.load(Sellsy::Api.request command)
+
+      response['status'] == 'success' ? response['response']['result'] : {}
     end
   end
 end
