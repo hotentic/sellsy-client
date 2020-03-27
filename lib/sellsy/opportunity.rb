@@ -3,7 +3,7 @@ require 'multi_json'
 module Sellsy
   class Opportunity
     attr_accessor :id, :name, :reference, :amount, :entity_type, :entity_id, :source_name, :funnel_name, :step_name,
-                  :comments
+                  :comments, :contacts
 
     def create
       command = {
@@ -75,7 +75,8 @@ module Sellsy
                 'potential' => @amount,
                 'funnelid' => funnel['id'],
                 'dueDate' => (Date.today + 1.month).to_datetime.to_i,
-                'stepid' => step['id']
+                'stepid' => step['id'],
+                'contacts' => @contacts.blank? ? nil : @contacts.join(',')
             }
         }
       else
