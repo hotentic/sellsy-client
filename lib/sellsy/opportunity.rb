@@ -76,7 +76,8 @@ module Sellsy
                 'funnelid' => funnel['id'],
                 'dueDate' => (Date.today + 1.month).to_datetime.to_i,
                 'stepid' => step['id'],
-                'contacts' => @contacts.blank? ? nil : @contacts.join(',')
+                'contacts' => @contacts.blank? ? nil : @contacts.join(','),
+                'stickyNote' => @comments
             }
         }
       else
