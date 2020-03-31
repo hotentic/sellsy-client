@@ -2,8 +2,8 @@ require 'multi_json'
 
 module Sellsy
   class Contact
-    attr_accessor :id, :title, :name, :first_name, :last_name, :third_id, :email, :telephone, :mobile, :fax, :website,
-                  :role, :birth_date
+    attr_accessor :id, :title, :name, :first_name, :last_name, :third_ids, :email, :telephone, :mobile, :fax, :website,
+                  :role, :birth_date, :linked_type, :linked_id
 
     def create
       command = {
@@ -17,6 +17,19 @@ module Sellsy
 
       @id = response['response']['id'] if response['response']
 
+      response['status'] == 'success'
+    end
+
+    def update
+      command = {
+          'method' => 'Peoples.update',
+          'params' => {
+              'id' => @id,
+              'people' => to_params
+          }
+      }
+
+      response = MultiJson.load(Sellsy::Api.request command)
       response['status'] == 'success'
     end
 
@@ -58,6 +71,39 @@ module Sellsy
       contact
     end
 
+    def self.search(name, b_date)
+      contacts = []
+
+      unless name.blank? || b_date.blank?
+        command = {
+            'method' => 'Peoples.getList',
+            'params' => {
+                'search' => {
+                    'contains' => name,
+                    'birthdate' => b_date.blank? ? nil : Date.parse(b_date).to_datetime.to_i,
+                }
+            }
+        }
+
+        response = MultiJson.load(Sellsy::Api.request command)
+
+        if response['response']
+          response['response']['result'].each do |key, value|
+            contact = Contact.new
+            contact.id = key
+            contact.linked_type = value['linkedtype']
+            contact.linked_id = value['linkedid']
+            contact.name = value['name']
+            contact.first_name = value['forename']
+            contact.third_ids = ((value['prospectList'] || []) + (value['thirdList'] || []) + (value['supplierList'] || [])).map {|e| e['id']}
+            contacts << contact
+          end
+        end
+      end
+
+      contacts
+    end
+
     def to_params
       {
         'civil' => civil_enum(@title),
@@ -70,7 +116,7 @@ module Sellsy
         'web' => @website,
         'position' => @role,
         'birthdate' => @birth_date.blank? ? '' : Date.parse(@birth_date).to_datetime.to_i,
-        'thirdids' => @third_id.blank? ? nil : [@third_id]
+        'thirdids' => @third_ids.blank? ? nil : @third_ids
       }
     end
 
