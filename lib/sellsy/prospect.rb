@@ -80,6 +80,7 @@ module Sellsy
           prospect = Prospect.new
           prospect.id = key
           prospect.name = value['fullName']
+          prospect.email = value['email']
           prospects << prospect
         end
       end

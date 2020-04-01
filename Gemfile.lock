@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sellsy-client (0.7.0)
+    sellsy-client (0.8.0)
       multi_json (~> 1.11)
       rest-client (~> 2.0, >= 2.0.2)
 

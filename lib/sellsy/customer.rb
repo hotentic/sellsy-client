@@ -29,7 +29,7 @@ module Sellsy
 
     def to_params
       {
-          'id' => @id,
+          'clientid' => @id,
           'third' => {
               'name' => person_type == 'pp' ? @name : @structure_name,
               'type' => person_type == 'pp' ? 'person' : 'corporation',
@@ -61,7 +61,6 @@ module Sellsy
         value = response['response']['client']
         client.id = value['id']
         client.name = value['name']
-        client.type = value['type']
         client.contacts = response['response']['contacts']
       end
 
@@ -82,6 +81,7 @@ module Sellsy
           client = Customer.new
           client.id = key
           client.name = value['fullName']
+          client.email = value['email']
           clients << client
         end
       end

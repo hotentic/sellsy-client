@@ -71,10 +71,10 @@ module Sellsy
       contact
     end
 
-    def self.search(name, b_date)
+    def self.search(name, b_date = nil)
       contacts = []
 
-      unless name.blank? || b_date.blank?
+      unless name.blank?
         command = {
             'method' => 'Peoples.getList',
             'params' => {
@@ -95,6 +95,7 @@ module Sellsy
             contact.linked_id = value['linkedid']
             contact.name = value['name']
             contact.first_name = value['forename']
+            contact.email = value['email']
             contact.third_ids = ((value['prospectList'] || []) + (value['thirdList'] || []) + (value['supplierList'] || [])).map {|e| e['id']}
             contacts << contact
           end
