@@ -82,6 +82,7 @@ module Sellsy
           client.id = key
           client.name = value['fullName']
           client.email = value['email']
+          client.siret = value['siret']
           clients << client
         end
       end

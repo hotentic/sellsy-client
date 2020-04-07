@@ -81,6 +81,7 @@ module Sellsy
           prospect.id = key
           prospect.name = value['fullName']
           prospect.email = value['email']
+          prospect.siret = value['siret']
           prospects << prospect
         end
       end
