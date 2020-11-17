@@ -41,12 +41,12 @@ module Sellsy
       end
     end
 
-    def self.all
+    def self.all(nb_per_page = 30)
       command = {
           'method' => 'CustomFields.getList',
           'params' => {
               'pagination' => {
-                  'nbperpage' => 30
+                  'nbperpage' => nb_per_page
               }
           }
       }
